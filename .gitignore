@@ -1,0 +1,13 @@
+objs/
+
+*.obj
+*.o
+*.lib
+*.exe
+*.exp
+.suo
+*.db
+cigar
+*.txt
+out*
+*.sqlite

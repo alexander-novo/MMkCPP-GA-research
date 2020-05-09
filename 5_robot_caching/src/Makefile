@@ -42,13 +42,20 @@ cigartest	: $(OBJS) $(TESTOBJS)
 	$(CC) -o cigartest $(OBJS) $(TESTOBJS) $(CLIBS)
 
 clean	: 
+ifeq ($(OS),Windows_NT)
+	del $(OBJS) $(APPOBJS)
+else
 	rm $(OBJS) $(APPOBJS)
 	touch $(HDRS) $(APPHDRS)
+endif
 
 dist	:
 	tar -cvzf $(BASENAME) $(HDRS) $(APPHDRS) $(SRCS) $(APPSRCS) $(INFILE) Makefile $(TESTHDRS) $(TESTSRCS) $(TESTINFILE)
 	cp $(BASENAME) /staff/sushil/classes/gas/code/cigar/
 
-$(OBJS)	: $(HDRS) $(APPHDRS)
+# $(OBJS)	: $(HDRS) $(APPHDRS)
 
-$(APPOBJS)	:	$(APPHRDS)
+# $(APPOBJS)	:	$(APPHRDS)
+
+%.o: $.c
+	$(CC) -c -o $@ $< $(CFLAGS)
