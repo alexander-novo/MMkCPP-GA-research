@@ -27,10 +27,10 @@ __constant__ int graph[NUMBER_POINTS * NUMBER_POINTS];
 __constant__ Edges edges[NUMBER_EDGES];
 int edgeValues[NUMBER_EDGES];
 
-__constant__ int dijkstraRouteTable[NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH];
+__device__ int dijkstraRouteTable[NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH];
 ////[NUMBER_POINTS][MAX_ROUTE_LENGTH];   //with very large graphs this may exceed memory limits
 
-__constant__ int dijkstraDistTable[NUMBER_POINTS * NUMBER_POINTS];
+__device__ int dijkstraDistTable[NUMBER_POINTS * NUMBER_POINTS];
 
 // bool DIJKSTRA_INITIALIZED_FLAG = false;
 
@@ -75,94 +75,96 @@ __device__ int Dijkstra(int start, int end, int route[MAX_ROUTE_LENGTH],
 	// printf("entered dijkstra\n");
 	// Check cache table of dijkstra route values first
 	// commented out to temporarily disable caching
-	// if (dijkstraDistTable[start * NUMBER_POINTS + end] > -1) {
-	// 	for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
-	// 		route[i] = dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i];
-	// 	}
-	// 	return dijkstraDistTable[start * NUMBER_POINTS + end];
-	// } else {
-	// printf("entered dijkstra else\n");
-	// printf("Dijkstra long\n");
-	// DIJKSTRA_COUNT += 1;
-	// if value not in table, compute it for the first time
-	int dis[NUMBER_POINTS];
-	bool vis[NUMBER_POINTS];
-
-	int prev[NUMBER_POINTS];  // to track route
-
-	memset(dis, INF, sizeof(int) * NUMBER_POINTS);
-	memset(vis, false, sizeof(bool) * NUMBER_POINTS);
-	memset(prev, -1, sizeof(int) * NUMBER_POINTS);
-
-	dis[start] = 0;
-	vis[start] = true;
-
-	// update the connected distance
-	for (int j = 0; j < NUMBER_POINTS; j++) {
-		if (vis[j] == false && graph[start * NUMBER_POINTS + j] > 0) {
-			dis[j] = graph[start * NUMBER_POINTS + j] *
-			         visitedGraph[start][j];  // Multiply distance by 1.0 if unvisited, by
-			                                  // deadheading ratio if visited --
+	if (dijkstraDistTable[start * NUMBER_POINTS + end] > -1) {
+		for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
+			route[i] = dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i];
 		}
-	}
+		return dijkstraDistTable[start * NUMBER_POINTS + end];
+	} else {
+		// printf("entered dijkstra else\n");
+		// printf("Dijkstra long\n");
+		// DIJKSTRA_COUNT += 1;
+		// if value not in table, compute it for the first time
+		int dis[NUMBER_POINTS];
+		bool vis[NUMBER_POINTS];
 
-	for (int i = 0; i < NUMBER_POINTS; i++) {
-		// find the connected point with the shortest distance
-		int minx    = INF;
-		int minmark = 0;
+		int prev[NUMBER_POINTS];  // to track route
+
+		memset(dis, INF, sizeof(int) * NUMBER_POINTS);
+		memset(vis, false, sizeof(bool) * NUMBER_POINTS);
+		memset(prev, -1, sizeof(int) * NUMBER_POINTS);
+
+		dis[start] = 0;
+		vis[start] = true;
+
+		// update the connected distance
 		for (int j = 0; j < NUMBER_POINTS; j++) {
-			if (vis[j] == false && dis[j] <= minx) {
-				minx    = dis[j];
-				minmark = j;
+			if (vis[j] == false && graph[start * NUMBER_POINTS + j] > 0) {
+				dis[j] = graph[start * NUMBER_POINTS + j] *
+				         visitedGraph[start][j];  // Multiply distance by 1.0 if unvisited, by
+				                                  // deadheading ratio if visited --
 			}
 		}
-		// mark the point
-		vis[minmark] = true;
 
-		// update all the unmarked points connected to the current marked point.
-		for (int j = 0; j < NUMBER_POINTS; j++) {
-			if (vis[j] == false && graph[minmark * NUMBER_POINTS + j] > 0 &&
-			    dis[j] > dis[minmark] + (graph[minmark * NUMBER_POINTS + j] *
-			                             visitedGraph[minmark][j]))  // mult with visited graph to
-			                                                         // account for deadheading --
-			{
-				dis[j] = dis[minmark] + (graph[minmark * NUMBER_POINTS + j] *
-				                         visitedGraph[minmark][j]);  // mult with visited graph to
-				                                                     // account for deadheading --
-				prev[j] = minmark;
+		for (int i = 0; i < NUMBER_POINTS; i++) {
+			// find the connected point with the shortest distance
+			int minx    = INF;
+			int minmark = 0;
+			for (int j = 0; j < NUMBER_POINTS; j++) {
+				if (vis[j] == false && dis[j] <= minx) {
+					minx    = dis[j];
+					minmark = j;
+				}
+			}
+			// mark the point
+			vis[minmark] = true;
+
+			// update all the unmarked points connected to the current marked point.
+			for (int j = 0; j < NUMBER_POINTS; j++) {
+				if (vis[j] == false && graph[minmark * NUMBER_POINTS + j] > 0 &&
+				    dis[j] >
+				        dis[minmark] + (graph[minmark * NUMBER_POINTS + j] *
+				                        visitedGraph[minmark][j]))  // mult with visited graph to
+				                                                    // account for deadheading --
+				{
+					dis[j] =
+					    dis[minmark] + (graph[minmark * NUMBER_POINTS + j] *
+					                    visitedGraph[minmark][j]);  // mult with visited graph to
+					                                                // account for deadheading --
+					prev[j] = minmark;
+				}
 			}
 		}
-	}
 
-	// prepare route array
-	for (int i = 0; i < MAX_ROUTE_LENGTH; i++) { route[i] = -1; }
+		// prepare route array
+		for (int i = 0; i < MAX_ROUTE_LENGTH; i++) { route[i] = -1; }
 
-	// Reconstruct route (produces route in reverse order: destination to source)
-	int u          = end;
-	int routeIndex = 0;
-	if (prev[u] != -1 || u == start) {
-		while (u != -1) {
-			route[routeIndex] = u;
-			routeIndex++;
-			u = prev[u];
+		// Reconstruct route (produces route in reverse order: destination to source)
+		int u          = end;
+		int routeIndex = 0;
+		if (prev[u] != -1 || u == start) {
+			while (u != -1) {
+				route[routeIndex] = u;
+				routeIndex++;
+				u = prev[u];
+			}
 		}
-	}
-	for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
-		if (route[i] < 0) { route[i] = -1; }
-	}
+		for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
+			if (route[i] < 0) { route[i] = -1; }
+		}
 
-	// copy finalized route into cache table
-	// temporarily commented out to disable caching
-	for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
-		// printf("%d\n", route[i]);
-		dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i] = route[i];
+		// copy finalized route into cache table
+		// temporarily commented out to disable caching
+		for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
+			// printf("%d\n", route[i]);
+			dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i] = route[i];
+		}
+
+		// copy finalized distance into cache table
+		dijkstraDistTable[start * NUMBER_POINTS + end] = dis[end];
+
+		return dis[end];
 	}
-
-	// copy finalized distance into cache table
-	dijkstraDistTable[start * NUMBER_POINTS + end] = dis[end];
-
-	return dis[end];
-	//}
 }
 
 __host__ int Dijkstra_host(int start, int end, int route[MAX_ROUTE_LENGTH],

@@ -36,7 +36,7 @@ INFILE  = infile eil76.tsp berlin52.tsp eil51.tsp lin105.tsp lin318.tsp run.sh
 BASENAME	= cigartsp-1.1.tgz
 
 CFLAGS =  -O3 -dc
-NVCCFLAGS = -O3 -arch=compute_70 -Xptxas="-v --disable-optimizer-constants"
+NVCCFLAGS = -O3 -dc
 CLIBS = 
 
 cigar	: $(OBJS) $(APPOBJS)
@@ -58,7 +58,7 @@ dist	:
 	cp $(BASENAME) /staff/sushil/classes/gas/code/cigar/
 
 #$(OBJS)	: $(HDRS) $(APPHDRS)
-$(OBJDIR)/%.obj: %.cu
+$(OBJDIR)/%.obj: %.cu Makefile
 	$(NVCC) -c -o $@ $< $(NVCCFLAGS)
 
 #$(APPOBJS)	:	$(APPHRDS)
