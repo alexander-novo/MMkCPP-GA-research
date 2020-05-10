@@ -2,7 +2,7 @@
 # first line must be a comment
 # One concept per line
 200		# population size
-76		# Chromosome length
+116		# Chromosome length
 100		# Number of generations to run
 2 		# kindofcrossover 
 2		# numberofcrossoverpoints

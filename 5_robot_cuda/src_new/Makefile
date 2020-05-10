@@ -1,4 +1,5 @@
-CC = nvcc
+CC = gcc
+NVCC = nvcc
 
 HDRS =  type.h defaults.h case.h random.h utils.h select.h finders.h \
 	dist.h ox.h 
@@ -35,13 +36,14 @@ INFILE  = infile eil76.tsp berlin52.tsp eil51.tsp lin105.tsp lin318.tsp run.sh
 BASENAME	= cigartsp-1.1.tgz
 
 CFLAGS =  -O3 -dc
+NVCCFLAGS = -O3 -arch=compute_70 -Xptxas="-v --disable-optimizer-constants"
 CLIBS = 
 
 cigar	: $(OBJS) $(APPOBJS)
-	$(CC) -o cigar $(OBJS) $(APPOBJS) $(CLIBS)
+	$(NVCC) -o cigar $(OBJS) $(APPOBJS) $(CLIBS)
 
 cigartest	: $(OBJS) $(TESTOBJS)
-	$(CC) -o cigartest $(OBJS) $(TESTOBJS) $(CLIBS)
+	$(NVCC) -o cigartest $(OBJS) $(TESTOBJS) $(CLIBS)
 
 clean	: 
 ifeq ($(OS),Windows_NT)
@@ -57,6 +59,6 @@ dist	:
 
 #$(OBJS)	: $(HDRS) $(APPHDRS)
 $(OBJDIR)/%.obj: %.cu
-	$(CC) -c -o $@ $< $(CFLAGS)
+	$(NVCC) -c -o $@ $< $(NVCCFLAGS)
 
 #$(APPOBJS)	:	$(APPHRDS)
