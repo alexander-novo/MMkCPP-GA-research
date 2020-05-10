@@ -1,9 +1,9 @@
+#include <errno.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
-//#include <unistd.h>
-#include <errno.h>
+#include <unistd.h>
 
 #include "case.cuh"
 #include "cuda_runtime.h"
