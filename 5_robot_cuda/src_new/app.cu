@@ -865,6 +865,9 @@ void AppInit(char* appInfile, Population* p) {
 			}
 		}
 	}
+	p->chromLength = edge_index + 5;
+	printf("Setting the chromosome length to %d, based on number of edges in %s\n", p->chromLength,
+	       appInFile);
 	// initialize dijkstra table
 
 	index      = 0;

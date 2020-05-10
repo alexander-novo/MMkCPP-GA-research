@@ -272,24 +272,7 @@ void Initpop(Population *p) { /* initialize a random population */
 	// printf("got here -2 \n");
 
 	INDIVIDUAL *shared_pop;
-	cudaError_t e = cudaMallocManaged(&shared_pop, p->popsize * sizeof(INDIVIDUAL));
-	switch (e) {
-		case cudaSuccess:
-			printf("Success!\n");
-			break;
-		case cudaErrorMemoryAllocation:
-			printf("cudaErrorMemoryAllocation!\n");
-			break;
-		case cudaErrorNotSupported:
-			printf("cudaErrorNotSupported!\n");
-			break;
-		case cudaErrorInvalidValue:
-			printf("cudaErrorInvalidValue!\n");
-			break;
-	}
-	printf("Address: %d\n", shared_pop);
-	printf("Blah17 %d\n", shared_pop->objfunc);
-	fflush(stdout);
+	cudaMallocManaged(&shared_pop, p->popsize * sizeof(INDIVIDUAL));
 
 	int *shared_chroms;
 	cudaMallocManaged(&shared_chroms, p->popsize * p->chromLength * sizeof(int));
@@ -328,16 +311,10 @@ void Initpop(Population *p) { /* initialize a random population */
 	cudaDeviceSynchronize();
 
 	for (int i = 0; i < p->popsize; i++) {
-		pj = &p->oldpop[i];
-		op = &shared_pop[i];
-		printf("Blah3 %d\n", op);
-		fflush(stdout);
-		double b = op->objfunc;
-		printf("Blah4\n", i);
-		fflush(stdout);
+		pj          = &p->oldpop[i];
+		op          = &shared_pop[i];
+		double b    = op->objfunc;
 		pj->objfunc = b;
-		printf("Blah5\n", i);
-		fflush(stdout);
 		pj->fitness = p->maxConst - pj->objfunc;
 	}
 
