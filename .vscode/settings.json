@@ -1,5 +1,9 @@
 {
 	"files.exclude": {
 		"**/objs/": true
+	},
+	"files.associations": {
+		"*.cuh": "cpp",
+		"*.cu": "cpp"
 	}
 }
