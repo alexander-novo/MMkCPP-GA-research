@@ -27,10 +27,10 @@ __constant__ int graph[NUMBER_POINTS * NUMBER_POINTS];
 __constant__ Edges edges[NUMBER_EDGES];
 int edgeValues[NUMBER_EDGES];
 
-__constant__ int dijkstraRouteTable[NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH];
+__device__ int dijkstraRouteTable[NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH];
 ////[NUMBER_POINTS][MAX_ROUTE_LENGTH];   //with very large graphs this may exceed memory limits
 
-__constant__ int dijkstraDistTable[NUMBER_POINTS * NUMBER_POINTS];
+__device__ int dijkstraDistTable[NUMBER_POINTS * NUMBER_POINTS];
 
 // bool DIJKSTRA_INITIALIZED_FLAG = false;
 

@@ -36,11 +36,11 @@ INFILE  = infile eil76.tsp berlin52.tsp eil51.tsp lin105.tsp lin318.tsp run.sh
 BASENAME	= cigartsp-1.1.tgz
 
 CFLAGS =  -O3 -dc
-NVCCFLAGS = -O3 -arch=compute_70 -Xptxas="-v --disable-optimizer-constants"
+NVCCFLAGS = -O3 -dc -arch=sm_70 -Xptxas="-v --disable-optimizer-constants"
 CLIBS = 
 
 cigar	: $(OBJS) $(APPOBJS)
-	$(NVCC) -o cigar $(OBJS) $(APPOBJS) $(CLIBS)
+	$(NVCC) -o cigar $(OBJS) $(APPOBJS) $(CLIBS) -arch=sm_70
 
 cigartest	: $(OBJS) $(TESTOBJS)
 	$(NVCC) -o cigartest $(OBJS) $(TESTOBJS) $(CLIBS)
