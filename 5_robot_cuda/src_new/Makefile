@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 NVCC = nvcc
 
 HDRS =  type.h defaults.h case.h random.h utils.h select.h finders.h \
@@ -11,10 +11,12 @@ SRCS =  xover.c gen.c cigar.c report.c \
 
 OBJDIR		= objs
 
-OBJS =  $(OBJDIR)/xover.obj $(OBJDIR)/gen.obj $(OBJDIR)/cigar.obj $(OBJDIR)/report.obj \
+CUDAOBJS =  $(OBJDIR)/xover.obj $(OBJDIR)/gen.obj $(OBJDIR)/report.obj \
 	$(OBJDIR)/statistics.obj  $(OBJDIR)/random.obj  $(OBJDIR)/select.obj $(OBJDIR)/utils.obj $(OBJDIR)/halve.obj $(OBJDIR)/scale.obj \
 	$(OBJDIR)/finders.obj $(OBJDIR)/hms.obj $(OBJDIR)/case.obj  $(OBJDIR)/dist.obj\
 	$(OBJDIR)/pmx.obj $(OBJDIR)/evalpop.obj $(OBJDIR)/ox.obj $(OBJDIR)/lcs.obj
+
+COBJS = $(OBJDIR)/cigar.o
 
 APPHDRS = app.h init.h greedy.h
 
@@ -27,7 +29,7 @@ TESTHDRS = testapp.h testinit.h
 
 TESTSRCS = testapp.c testinit.c
 
-TESTOBJS = $(OBJDIR)/testapp.obj $(OBJDIR)/testinit.obj
+TESTOBJS = $(OBJDIR)/testapp.o $(OBJDIR)/testinit.o
 
 TESTINFILE = testinfile
 
@@ -35,12 +37,11 @@ INFILE  = infile eil76.tsp berlin52.tsp eil51.tsp lin105.tsp lin318.tsp run.sh
 
 BASENAME	= cigartsp-1.1.tgz
 
-CFLAGS =  -O3 -dc
-NVCCFLAGS = -O3 -dc
-CLIBS = 
+CFLAGS =  -O3 -std=c++11
+NVCCFLAGS = -O3 -dc -DCACHING
 
-cigar	: $(OBJS) $(APPOBJS)
-	$(NVCC) -o cigar $(OBJS) $(APPOBJS) $(CLIBS)
+cigar	: $(CUDAOBJS) $(COBJS) $(APPOBJS)
+	$(NVCC) -o cigar $(CUDAOBJS) $(COBJS) $(APPOBJS) $(CLIBS)
 
 cigartest	: $(OBJS) $(TESTOBJS)
 	$(NVCC) -o cigartest $(OBJS) $(TESTOBJS) $(CLIBS)
@@ -60,5 +61,8 @@ dist	:
 #$(OBJS)	: $(HDRS) $(APPHDRS)
 $(OBJDIR)/%.obj: %.cu Makefile
 	$(NVCC) -c -o $@ $< $(NVCCFLAGS)
+
+$(OBJDIR)/%.o: %.cpp Makefile
+	$(CC) -c -o $@ $< $(CFLAGS)
 
 #$(APPOBJS)	:	$(APPHRDS)

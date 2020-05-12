@@ -1,17 +1,12 @@
-#include <stdio.h>
-
-#include <cstdlib>
-
 #include "case.cuh"
-#include "type.cuh"
+#include "report.cuh"
 
 void ObjFuncStat(FILE *fp, IPTR pj, Population *p);
-void RawStat(FILE *fp, IPTR pj, Population *p);
 __host__ void PhenoPrint(FILE *fp, IPTR pj, Population *p);
 
 void GooguStat(FILE *fp, IPTR pop, Population *p);
 
-void Report(int gen, IPTR pop, Population *p) { /* report generations stats */
+void Report(int gen, IPTR pop, Population *p, double time) { /* report generations stats */
 	FILE *fp;
 
 	/* print Progress Statistics to file */
@@ -19,7 +14,7 @@ void Report(int gen, IPTR pop, Population *p) { /* report generations stats */
 		printf("error in opening file ofile: %s \n", p->oFile);
 		exit(1);
 	} else {
-		RawStat(fp, pop, p);
+		RawStat(fp, pop, p, time);
 		fclose(fp);
 	}
 	/* print Progress Statistics for Googu */
@@ -61,18 +56,18 @@ void Report(int gen, IPTR pop, Population *p) { /* report generations stats */
 	}
 
 	/* Progress stats on stdout */
-	RawStat(stdout, pop, p);
+	RawStat(stdout, pop, p, time);
 }
 
 void ObjFuncStat(FILE *fp, IPTR pj, Population *p) {
 	fprintf(fp, "%d %f\n", p->generation, pj->objfunc);
 }
 
-void RawStat(FILE *fp, IPTR pop, Population *p) {
+void RawStat(FILE *fp, IPTR pop, Population *p, double time) {
 	fprintf(fp, " %3d %12.3f %12.3f %12.3f %12.3f %12.3f", p->generation, p->max, p->avg, p->min,
 	        p->smax, p->smin);
 	fprintf(fp, " %3d %12.3f %3d", p->bigGen, p->bigMax, p->bigInd);
-	fprintf(fp, " %12.3f\n", pop[p->maxi].objfunc);
+	fprintf(fp, " %12.3f %6.3f\n", pop[p->maxi].objfunc, time);
 }
 
 void GooguStat(FILE *fp, IPTR pop, Population *p) {

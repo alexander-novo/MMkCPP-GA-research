@@ -1,20 +1,21 @@
 #include <errno.h>
-#include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <chrono>
+#include <cmath>
+#include <cstdio>
+#include <cstdlib>
+#include <vector>
+
 #include "case.cuh"
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
-#include "init.cuh"
-#include "type.cuh"
+#include "report.cuh"
+// #include "init.cuh"
+// #include "type.cuh"
 
 // extern int errno;
 
 void Statistics(IPTR, Population *p);
-void Report(int gen, IPTR pop, Population *p);
 
 void Initialize(int argc, char *argv[], Population *p, Functions *f);
 
@@ -37,11 +38,20 @@ int main(int argc, char *argv[]) {
 
 	Initialize(argc, argv, p, f);
 
+	std::vector<double> genTimes;
+	genTimes.reserve(p->maxgen);
+	double timeAverage = 0;
+
 	// WritePid(p->pidFile);
 	while (p->generation < p->maxgen) {
 		p->generation++;
 
-		foo = f->CurrentGA(p->oldpop, p->newpop, p->generation, p, f);
+		auto start = std::chrono::system_clock::now();
+		foo        = f->CurrentGA(p->oldpop, p->newpop, p->generation, p, f);
+		auto end   = std::chrono::system_clock::now();
+		genTimes.push_back(
+		    std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0);
+		timeAverage += genTimes.back() / p->maxgen;
 
 		if (p->injectFraction > 0.0) {
 			if ((p->generation % p->injectPeriod == 0) && (p->generation <= p->injectStop)) {
@@ -50,7 +60,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 		Statistics(p->newpop, p);
-		Report(p->generation, p->newpop, p);
+		Report(p->generation, p->newpop, p, genTimes.back());
 
 		// Record data (best individual at each gen)
 		FILE *dataFile;
@@ -84,6 +94,9 @@ int main(int argc, char *argv[]) {
 		p->nCases = FindNCases(p->nCFile);
 		StoreNcases(p->nCFile, p->nCases, p->nCurrentCases);
 	}
+
+	printf("Average time taken between generations: %f\n", timeAverage);
+	printf("Adjusted for population: %f\n", timeAverage / p->popsize);
 	// RmPidFile(p->pidFile);
 
 	return 0;

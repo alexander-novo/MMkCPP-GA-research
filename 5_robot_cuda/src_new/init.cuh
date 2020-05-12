@@ -1,3 +1,4 @@
+#include "report.cuh"
 #include "type.cuh"
 
 void Usage(void);
@@ -23,13 +24,10 @@ void PhenoPrint(FILE *fp, IPTR pop, Population *p);  // modified
 void AppInitChrom(IPTR pj);
 void AppInit(char *appInfile, Population *p);
 
-void RawStat(FILE *fp, IPTR pj, Population *p);
-
 int Generation0(IPTR oldpop, IPTR newpop, int t, Population *p, Functions *f);
 int CHC(IPTR oldpop, IPTR newpop, int t, Population *p, Functions *f);
 int Roulette(IPTR pop, int popsize, Population *p);
 int RandomMate(IPTR pop, int popsize, Population *p);
 
-void Report(int gen, IPTR pop, Population *p);
 //__global__ void EvalPopulation(IPTR pop, int start, int end, Population *p, int fitnesses[2]);
 __global__ void EvalPopulation(IPTR pop, int start, int end, int *chroms);

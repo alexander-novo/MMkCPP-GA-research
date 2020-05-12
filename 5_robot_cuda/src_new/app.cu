@@ -832,6 +832,10 @@ void AppSkipline(FILE* fp) {
 void AppInit(char* appInfile, Population* p) {
 	int graph_flat[NUMBER_POINTS * NUMBER_POINTS];
 
+#ifdef CACHING
+	printf("Initialising with caching on!\n");
+#endif
+
 	INIT_COUNT += 1;
 
 	FILE* fp;

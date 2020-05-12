@@ -2,10 +2,9 @@
 #ifndef __CASE_H__
 #define __CASE_H__
 
+#include <cstdio>
 
 #include "type.cuh"
-
-
 
 void LoadCases(IPTR pop, int gen, float frac, Population *p, Functions *h);
 int GetBest(IPTR pop, int size);
@@ -23,6 +22,4 @@ int FindNCases(char *ncfile);
 
 void GetSetSeqChrom(FILE *fp, IPTR pj, Population *p, int len);
 
-
 #endif
-

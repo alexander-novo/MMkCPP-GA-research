@@ -335,7 +335,7 @@ void Initreport(Population *p) {
 	printf("Starting GA...\n");
 	InitGooguReport(p->oldpop, p);
 
-	Report(p->generation, p->oldpop, p);
+	Report(p->generation, p->oldpop, p, 0.0);
 
 	/**********************************************
 	if( (fp = fopen(p->caseFileName,"a")) == NULL){
