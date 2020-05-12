@@ -1,0 +1,31 @@
+ maxConst 10000.000000
+ Enter population size - popsize-> popsize = 200
+ Enter chromosome length - lchrom-> lchrom = 76
+ Enter max. generations - maxgen-> maxgen = 10
+ Enter kind of crossover (0(npoint),1(PMX),2(OX), 3(Greedy),..)->  Xover: OX for sequential representations
+ Enter number of crossover points (used only for npoint xover)->
+ Enter crossover prob -> Crossover probability = 0.990000
+ Enter mutation prob -> Mutation probability = 0.400000
+ Enter file name for graph output -fname->  Save file is out
+ Enter GAflavor (0/1) ->  Enter Lambda (used only if CHC) ->
+ GAFlavor: CHC with lambda 2 
+ Enter MateFinder choice ->  Fitness Proportional 
+ Enter Scaling Factor ->  Scale Factor 1.200000
+ Enter converter to maximizing problem:
+ A large constant from which to subtract the obj. function value.
+ Used only if this is a minimization problem 
+ maxConst 10000.000000
+ Should I save cases?  Not Saving cases 
+ If I am going to use the case-base enter Injection Fraction  Injection Fraction is 0.000000
+ I am NOT going to use the case-base
+  Enter Inject Period  Injection Period is 15
+ Enter Inject Stop time  Injection stop time is 91
+ Injection strategy ->  Using Closest to Best 
+  Distance Metric ->  Distance Metric: Longest Common Substring 
+
+appinit finished
+PhenoFile: out.pheno
+errorFile: out.error
+pidFile: out.pid
+fitFile: out.fit
+/cm/local/apps/slurm/var/spool/job2161835/slurm_script: line 8: 176817 Segmentation fault      (core dumped) ./cigar -i infile -a ../../graphs/graph_50_800.csv -M -s 0.47657

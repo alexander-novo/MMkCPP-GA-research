@@ -3,7 +3,7 @@
 # One concept per line
 200		# population size
 76		# Chromosome length
-100		# Number of generations to run
+10 	# Number of generations to run
 2 		# kindofcrossover 
 2		# numberofcrossoverpoints
 #	Kind of Crossover

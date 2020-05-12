@@ -315,7 +315,7 @@ void InitGooguReport(IPTR op, Population *p) {
 	*******************************************************/
 }
 
-void Initialize(int argc, char *argv[], Population &p, Function &f) {
+void Initialize(int argc, char *argv[], Population *p, Functions *f) {
 	/* initialize everything */
 	char ncfile[1024];
 	int c;

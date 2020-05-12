@@ -1,0 +1,8 @@
+#!/bin/bash
+#SBATCH -A cpu-s5-chinese_postman-0
+#SBATCH -J cigar-cpu
+#SBATCH -o cigar-cpu-111.stdout
+#SBATCH -n 1         
+#SBATCH -p cpu-core-0
+#SBATCH -t 00:10:00
+./cigar -i infile -a ../../graphs/graph_50_800.csv -M -s 0.47657

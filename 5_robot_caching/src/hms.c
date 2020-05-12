@@ -1,39 +1,35 @@
 
-#include "type.h"
 #include <math.h>
 #include <stdio.h>
 
-double HamDist(ChromType *p1, ChromType *p2, int size);
+#include "type.h"
 
-void FindHammingStats(IPTR pop, Population *p)
-{
+// double HamDist(ChromType *p1, ChromType *p2, int size);
 
-  int i, n, j;
-  int hDist;
-  double sum, hamAvg, sdSum,hamVar;
-  int seeling;
-  double hamSD;
+// void FindHammingStats(IPTR pop, Population *p) {
+// 	int i, n, j;
+// 	int hDist;
+// 	double sum, hamAvg, sdSum, hamVar;
+// 	int seeling;
+// 	double hamSD;
 
-  seeling = p->popsize;
+// 	seeling = p->popsize;
 
-  hDist = 0;
-  n = 0;
-  j = 0;
-  sum = 0.0;
-  sdSum = 0.0;
-  for(j = 0; j < seeling; j++){
-    for(i = j+1; i < seeling; i++){
-      hDist = HamDist((pop[j].chrom), (pop[i].chrom), p->chromLength);
-      sum += hDist;
-      sdSum += hDist * hDist;
-      n++;
-    }
-  }
+// 	hDist = 0;
+// 	n     = 0;
+// 	j     = 0;
+// 	sum   = 0.0;
+// 	sdSum = 0.0;
+// 	for (j = 0; j < seeling; j++) {
+// 		for (i = j + 1; i < seeling; i++) {
+// 			hDist = HamDist((pop[j].chrom), (pop[i].chrom), p->chromLength);
+// 			sum += hDist;
+// 			sdSum += hDist * hDist;
+// 			n++;
+// 		}
+// 	}
 
-  hamAvg = sum/(double)n;
-  hamVar = ((n * sdSum) - (sum * sum))/ (n * (n - 1));
-  hamSD = sqrt(hamVar);
-
-}
-
-
+// 	hamAvg = sum / (double) n;
+// 	hamVar = ((n * sdSum) - (sum * sum)) / (n * (n - 1));
+// 	hamSD  = sqrt(hamVar);
+// }

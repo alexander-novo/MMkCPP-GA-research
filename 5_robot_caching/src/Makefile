@@ -1,4 +1,4 @@
-CC = gcc
+CC = g++
 
 HDRS =  type.h defaults.h case.h random.h utils.h select.h finders.h \
 	dist.h ox.h 
@@ -32,8 +32,8 @@ INFILE  = infile eil76.tsp berlin52.tsp eil51.tsp lin105.tsp lin318.tsp run.sh
 
 BASENAME	= cigartsp-1.1.tgz
 
-CFLAGS =  -O2 -Wall
-CLIBS = -lm 
+CFLAGS =  -O3 -Wall -std=c++11
+# CLIBS = -lm 
 
 cigar	: $(OBJS) $(APPOBJS)
 	$(CC) -o cigar $(OBJS) $(APPOBJS) $(CLIBS)
