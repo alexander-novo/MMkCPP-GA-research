@@ -58,7 +58,7 @@ dist	:
 	cp $(BASENAME) /staff/sushil/classes/gas/code/cigar/
 
 #$(OBJS)	: $(HDRS) $(APPHDRS)
-$(OBJDIR)/%.obj: %.cu
+$(OBJDIR)/%.obj: %.cu Makefile
 	$(NVCC) -c -o $@ $< $(NVCCFLAGS)
 
 #$(APPOBJS)	:	$(APPHRDS)
