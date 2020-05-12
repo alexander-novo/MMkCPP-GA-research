@@ -19,7 +19,7 @@ typedef struct {
 
 
 #define NUMBER_POINTS 50
-#define NUMBER_EDGES 111
+#define NUMBER_EDGES 199
 
 #define MAX_ROUTE_LENGTH (4*NUMBER_EDGES)
 
