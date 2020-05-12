@@ -3,8 +3,6 @@
 #include <cstdlib>
 
 #include "case.cuh"
-#include "cuda_runtime.h"
-#include "device_launch_parameters.h"
 #include "type.cuh"
 
 void ObjFuncStat(FILE *fp, IPTR pj, Population *p);
@@ -71,10 +69,10 @@ void ObjFuncStat(FILE *fp, IPTR pj, Population *p) {
 }
 
 void RawStat(FILE *fp, IPTR pop, Population *p) {
-	fprintf(fp, " %3d %9.3f %9.3f %9.3f %9.3f %9.3f", p->generation, p->max, p->avg, p->min,
+	fprintf(fp, " %3d %12.3f %12.3f %12.3f %12.3f %12.3f", p->generation, p->max, p->avg, p->min,
 	        p->smax, p->smin);
-	fprintf(fp, " %3d %9.3f %3d", p->bigGen, p->bigMax, p->bigInd);
-	fprintf(fp, " %9.3f\n", pop[p->maxi].objfunc);
+	fprintf(fp, " %3d %12.3f %3d", p->bigGen, p->bigMax, p->bigInd);
+	fprintf(fp, " %12.3f\n", pop[p->maxi].objfunc);
 }
 
 void GooguStat(FILE *fp, IPTR pop, Population *p) {

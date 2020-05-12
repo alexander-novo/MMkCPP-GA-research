@@ -27,10 +27,10 @@ __constant__ int graph[NUMBER_POINTS * NUMBER_POINTS];
 __constant__ Edges edges[NUMBER_EDGES];
 int edgeValues[NUMBER_EDGES];
 
+#ifdef CACHING
 __device__ int dijkstraRouteTable[NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH];
-////[NUMBER_POINTS][MAX_ROUTE_LENGTH];   //with very large graphs this may exceed memory limits
-
 __device__ int dijkstraDistTable[NUMBER_POINTS * NUMBER_POINTS];
+#endif
 
 // bool DIJKSTRA_INITIALIZED_FLAG = false;
 
@@ -75,12 +75,16 @@ __device__ int Dijkstra(int start, int end, int route[MAX_ROUTE_LENGTH],
 	// printf("entered dijkstra\n");
 	// Check cache table of dijkstra route values first
 	// commented out to temporarily disable caching
-	if (dijkstraDistTable[start * NUMBER_POINTS + end] > -1) {
+
+#ifdef CACHING
+	if (dijkstraDistTable[start * NUMBER_POINTS + end] > 0) {
 		for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
 			route[i] = dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i];
 		}
 		return dijkstraDistTable[start * NUMBER_POINTS + end];
+
 	} else {
+#endif
 		// printf("entered dijkstra else\n");
 		// printf("Dijkstra long\n");
 		// DIJKSTRA_COUNT += 1;
@@ -155,16 +159,18 @@ __device__ int Dijkstra(int start, int end, int route[MAX_ROUTE_LENGTH],
 
 		// copy finalized route into cache table
 		// temporarily commented out to disable caching
+#ifdef CACHING
 		for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
-			// printf("%d\n", route[i]);
 			dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i] = route[i];
 		}
-
 		// copy finalized distance into cache table
 		dijkstraDistTable[start * NUMBER_POINTS + end] = dis[end];
+#endif
 
 		return dis[end];
+#ifdef CACHING
 	}
+#endif
 }
 
 __host__ int Dijkstra_host(int start, int end, int route[MAX_ROUTE_LENGTH],
@@ -173,14 +179,20 @@ __host__ int Dijkstra_host(int start, int end, int route[MAX_ROUTE_LENGTH],
 
 	// Check cache table of dijkstra route values first
 	// commented out to temporarily disable caching
+	/*
+	if (false)// (dijkstraDistTable[start][end] != -1) // > 0)
+	{
 
-	// if (dijkstraDistTable[start * NUMBER_POINTS + end] > -1) {
-	// 	for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
-	// 		route[i] = dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i];
-	// 	}
-	// 	return dijkstraDistTable[start * NUMBER_POINTS + end];
+	    for (int i = 0; i < MAX_ROUTE_LENGTH; i++)
+	    {
+	    route[i] = dijkstraRouteTable[start][end][i];
+	    }
+	    return dijkstraDistTable[start][end];
 
-	// } else {
+	}
+	else
+	{
+	*/
 	// printf("Dijkstra long\n");
 	// DIJKSTRA_COUNT += 1;
 	// if value not in table, compute it for the first time
@@ -260,20 +272,18 @@ __host__ int Dijkstra_host(int start, int end, int route[MAX_ROUTE_LENGTH],
 	}
 
 	// copy finalized route into cache table
+	// temporarily commented out to disable caching
+	// for (int i = 0; i < MAX_ROUTE_LENGTH; i++)
+	//{
+	// printf("%d\n", route[i]);
+	// dijkstraRouteTable[start][end][i] = route[i];
 
-	// Don't write anything as hsot
-	// for (int i = 0; i < MAX_ROUTE_LENGTH; i++) {
-	// 	// printf("%d\n", route[i]);
-	// 	dijkstraRouteTable[(start * NUMBER_POINTS + end) * MAX_ROUTE_LENGTH + i] = route[i];
-	// }
+	//}
 
 	// copy finalized distance into cache table
-
-	// Don't write anything as the host
-	// dijkstraDistTable[start * NUMBER_POINTS + end] = dis[end];
+	// dijkstraDistTable[start][end] = dis[end];
 	// printf("\nd_host returns: %d", dis[end]);
 	return dis[end];
-	//}
 }
 
 // GPU device-friendly max function for integers (can't call a const expr host function from a
@@ -295,8 +305,8 @@ __device__ int getStartPoint(IPTR pj, int p0, int p1,
 	int p0e = edges[chroms[c_index * pj->chromLen + p0]].end;
 	int p1s = edges[chroms[c_index * pj->chromLen + p1]].start;
 	int p1e = edges[chroms[c_index * pj->chromLen + p1]]
-	              .end;  // posibly going past the max length since robots index >= 83 when
-	                     // asked for robot+1 and robot+2
+	              .end;  // posibly going past the max length since robots index >= 83 when asked
+	                     // for robot+1 and robot+2
 
 	if (p0s == p1s || p0s == p1e)  // if 0s=1s or 0s=1e
 	{
@@ -386,9 +396,8 @@ __device__ Tuple routeDistance(IPTR pj, int posStart, int posEnd, int* currentPo
 	// first edge
 	if (*currentPoint == edges[chroms[c_index * pj->chromLen + posStart]].start) {
 		*currentPoint = edges[chroms[c_index * pj->chromLen + posStart]].end;
-		// Commented out because it doesn't do anything?
-		// graph[edges[chroms[c_index * pj->chromLen + posStart]].start * NUMBER_POINTS +
-		//       edges[chroms[c_index * pj->chromLen + posStart]].end];
+		graph[edges[chroms[c_index * pj->chromLen + posStart]].start * NUMBER_POINTS +
+		      edges[chroms[c_index * pj->chromLen + posStart]].end];
 
 		/*
 		myRoute[routeIndex] = edges[pj->chrom[posStart]].start;
@@ -397,9 +406,8 @@ __device__ Tuple routeDistance(IPTR pj, int posStart, int posEnd, int* currentPo
 		routeIndex++;*/
 	} else if (*currentPoint == edges[chroms[c_index * pj->chromLen + posStart]].end) {
 		*currentPoint = edges[chroms[c_index * pj->chromLen + posStart]].start;
-		// No effectr
-		// graph[edges[chroms[c_index * pj->chromLen + posStart]].start * NUMBER_POINTS +
-		//       edges[chroms[c_index * pj->chromLen + posStart]].end];
+		graph[edges[chroms[c_index * pj->chromLen + posStart]].start * NUMBER_POINTS +
+		      edges[chroms[c_index * pj->chromLen + posStart]].end];
 
 		/*
 		myRoute[routeIndex] = edges[pj->chrom[posStart]].end;
@@ -427,8 +435,8 @@ __device__ Tuple routeDistance(IPTR pj, int posStart, int posEnd, int* currentPo
 
 			for (int z = 0; z < MAX_ROUTE_LENGTH - 1; z++) {
 				if (dummyRoute[z] != -1 && dummyRoute[z + 1] != -1) {
-					// visitedGraph[dummyRoute[z]][dummyRoute[z + 1]] = DEADHEADING_RATIO;
-					// //mark edge as visited visitedGraph[dummyRoute[z + 1]][dummyRoute[z]] =
+					// visitedGraph[dummyRoute[z]][dummyRoute[z + 1]] = DEADHEADING_RATIO;  //mark
+					// edge as visited visitedGraph[dummyRoute[z + 1]][dummyRoute[z]] =
 					// DEADHEADING_RATIO;
 				}
 			}
@@ -446,8 +454,8 @@ __device__ Tuple routeDistance(IPTR pj, int posStart, int posEnd, int* currentPo
 
 			for (int z = 0; z < MAX_ROUTE_LENGTH - 1; z++) {
 				if (dummyRoute2[z] != -1 && dummyRoute2[z + 1] != -1) {
-					// visitedGraph[dummyRoute2[z]][dummyRoute2[z + 1]] = DEADHEADING_RATIO;
-					// //mark edge as visited visitedGraph[dummyRoute2[z + 1]][dummyRoute2[z]] =
+					// visitedGraph[dummyRoute2[z]][dummyRoute2[z + 1]] = DEADHEADING_RATIO;  //mark
+					// edge as visited visitedGraph[dummyRoute2[z + 1]][dummyRoute2[z]] =
 					// DEADHEADING_RATIO;
 				}
 			}
@@ -459,9 +467,8 @@ __device__ Tuple routeDistance(IPTR pj, int posStart, int posEnd, int* currentPo
 		                [edges[chroms[c_index * pj->chromLen + i]]
 		                     .end];  // mult with visited graph to account for deadheading --
 		// visitedGraph[edges[pj->chrom[i]].start][edges[pj->chrom[i]].end] = DEADHEADING_RATIO;
-		// //mark edge as visited
-		// visitedGraph[edges[pj->chrom[i]].end][edges[pj->chrom[i]].start] = DEADHEADING_RATIO;
-		// //mark edge as visited in reverse direction
+		// //mark edge as visited visitedGraph[edges[pj->chrom[i]].end][edges[pj->chrom[i]].start] =
+		// DEADHEADING_RATIO;   //mark edge as visited in reverse direction
 
 		for (int z = 0; z < MAX_ROUTE_LENGTH; z++) {
 			dummyRoute[z]  = -1;
@@ -614,8 +621,8 @@ __device__ double Eval(IPTR pj, int* chroms, int c_index)  // modified 83-87 are
 		int temp       = 0;
 		for (int y = 0; y < 5; y++) {
 			temp  = myOrder[y];
-			int r = y;  // int r = Rnd(0, 4); // changing this to avoid host function call in
-			            // device code. Permutations/deadheading not addressed right now.
+			int r = y;  // int r = Rnd(0, 4); // changing this to avoid host function call in device
+			            // code. Permutations/deadheading not addressed right now.
 			myOrder[y] = myOrder[r];
 			myOrder[r] = temp;
 		}
@@ -772,8 +779,8 @@ __device__ double Eval(IPTR pj, int* chroms, int c_index)  // modified 83-87 are
 
 		routeDistTotal += longestRoute;
 
-		// routeDistTotal += robot1Dis + robot2Dis + robot3Dis + robot4Dis + robot5Dis;	//For
-		// non min-max problem
+		// routeDistTotal += robot1Dis + robot2Dis + robot3Dis + robot4Dis + robot5Dis;	//For non
+		// min-max problem
 
 		// Verify routes are a complete covering
 		for (int i = 0; i < NUMBER_POINTS; i++) {
@@ -824,8 +831,6 @@ void AppSkipline(FILE* fp) {
 
 void AppInit(char* appInfile, Population* p) {
 	int graph_flat[NUMBER_POINTS * NUMBER_POINTS];
-	int dijkstraDistTable_flat[NUMBER_POINTS * NUMBER_POINTS];
-	int dijkstraRouteTable_flat[NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH];
 
 	INIT_COUNT += 1;
 
@@ -862,21 +867,24 @@ void AppInit(char* appInfile, Population* p) {
 	p->chromLength = edge_index + 5;
 	printf("Setting the chromosome length to %d, based on number of edges in %s\n", p->chromLength,
 	       appInfile);
-	// initialize dijkstra table
-
-	cudaMemset(dijkstraDistTable, -1, NUMBER_POINTS * NUMBER_POINTS * sizeof(int));
-	cudaMemset(dijkstraRouteTable, -1,
-	           NUMBER_POINTS * NUMBER_POINTS * MAX_ROUTE_LENGTH * sizeof(int));
 
 	// copy arrays to to memory the device code can read
 	cudaMemcpyToSymbol(edges, edges_h, NUMBER_EDGES * sizeof(Edges));
 	cudaMemcpyToSymbol(graph, graph_flat, NUMBER_POINTS * sizeof(int) * NUMBER_POINTS);
+#ifdef CACHING
+	cudaMemset(dijkstraDistTable, 0, NUMBER_POINTS * NUMBER_POINTS * sizeof(int));
+#endif
+	// cudaMemcpyToSymbol(dijkstraDistTable, dijkstraDistTable_flat,
+	//                    NUMBER_POINTS * NUMBER_POINTS * sizeof(int));
+	// cudaMemcpyToSymbol(dijkstraRouteTable, dijkstraRouteTable_flat,
+	// NUMBER_POINTS*NUMBER_POINTS*MAX_ROUTE_LENGTH*sizeof(int));
 
-	// for (int i = 0; i < NUMBER_POINTS; i++) {
-	// 	cudaMemcpyToSymbol(graph[i], graph_h[i], NUMBER_POINTS * sizeof(int));
-	// 	cudaMemcpyToSymbol(dijkstraDistTable[i], dijkstraDistTable_h[i],
-	// 	                   NUMBER_POINTS * sizeof(int));
-	// }
+	/*
+	for (int i = 0; i < NUMBER_POINTS; i++)
+	{
+	    cudaMemcpyToSymbol(graph[i], graph_h[i], NUMBER_POINTS*sizeof(int));
+	    cudaMemcpyToSymbol(dijkstraDistTable[i], dijkstraDistTable_h[i], NUMBER_POINTS*sizeof(int));
+	}*/
 
 	printf("appinit finished\n");
 

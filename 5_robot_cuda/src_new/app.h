@@ -10,18 +10,17 @@ typedef int Appstruct;
 typedef struct {
 	float x;
 	float y;
-}Coords;
+} Coords;
 
 typedef struct {
 	int start;
 	int end;
-}Edges;
+} Edges;
 
+#define NUMBER_POINTS 50
+#define NUMBER_EDGES 111
 
-#define NUMBER_POINTS 27
-#define NUMBER_EDGES 51
-
-#define MAX_ROUTE_LENGTH (4*NUMBER_EDGES)
+#define MAX_ROUTE_LENGTH (4 * NUMBER_EDGES)
 
 //#define NUMBER_POINTS 10
 //#define NUMBER_EDGES 21

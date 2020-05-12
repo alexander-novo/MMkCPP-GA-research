@@ -1,0 +1,9 @@
+#!/bin/bash
+#SBATCH -A gpu-s5-chinese_postman-0
+#SBATCH -J cigar-gpu
+#SBATCH -o cigar-gpu.stdout
+#SBATCH -n 1         
+#SBATCH -p gpu-core-0
+#SBATCH --gres=gpu:2
+#SBATCH -t 00:10:00
+./cigar -i infile -a 100_test.csv -M -s 0.47657

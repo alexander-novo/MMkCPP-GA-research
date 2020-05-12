@@ -35,14 +35,9 @@ int main(int argc, char *argv[]) {
 
 	p->generation = 0;
 
-	printf("Blah\n");
-	fflush(stdout);
 	Initialize(argc, argv, p, f);
 
 	// WritePid(p->pidFile);
-
-	printf("Blah\n");
-	fflush(stdout);
 	while (p->generation < p->maxgen) {
 		p->generation++;
 
